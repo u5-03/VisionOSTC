@@ -11,5 +11,13 @@
 		<key>UISceneConfigurations</key>
 		<dict/>
 	</dict>
+	<key>NSWorldSensingUsageDescription</key>
+	<string>このアプリは壁面を検知してPortalを表示するためにARKitを使用します</string>
+	<key>NSSiriUsageDescription</key>
+	<string>このアプリはSiriでスマートホーム機能を操作するために使用します</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>このアプリはローカル通知を送信するために通知機能を使用します</string>
+	<key>AppIntentsPackage</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 </dict>
 </plist>
