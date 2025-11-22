@@ -58,12 +58,11 @@ struct PortalWindowView: View {
             portalPlane.model?.mesh = newMesh
         }
 
-        // 写真のサイズも更新
+        // 空間写真（ImagePresentationComponent）側のスケールを更新
         if let portalWorld = portal.findEntity(named: "portalWorld"),
-           let photoEntity = portalWorld.findEntity(named: "enoshimaPhoto") as? ModelEntity {
-            let photoSize = size * 2.0  // 50%表示のため2倍
-            let newPhotoMesh = MeshResource.generatePlane(width: photoSize, height: photoSize)
-            photoEntity.model?.mesh = newPhotoMesh
+           let spatialPhoto = portalWorld.findEntity(named: "spatialPhoto") {
+            let scaleFactor: Float = 1.0 // 必要に応じて調整
+            spatialPhoto.scale = [size * scaleFactor, size * scaleFactor, 1]
         }
     }
 
@@ -81,7 +80,7 @@ struct PortalWindowView: View {
         Task {
             do {
                 try await createPhotoEnvironment(on: portalWorld, size: size)
-                print("enoshima.JPG環境の読み込み成功")
+                print("空間写真の読み込み成功")
             } catch {
                 print("環境の読み込み失敗: \(error.localizedDescription)")
             }
@@ -112,27 +111,28 @@ struct PortalWindowView: View {
 
     /// 写真環境を作成
     private func createPhotoEnvironment(on root: Entity, size: Float) async throws {
-        guard let imageURL = Bundle.main.url(forResource: "enoshima", withExtension: "JPG") else {
-            throw NSError(domain: "PortalError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to load enoshima.JPG"])
+        guard let imageURL = Bundle.main.url(forResource: "space_picture", withExtension: "heic") else {
+            throw NSError(domain: "PortalError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to load space_picture.heic"])
         }
 
-        let texture = try await TextureResource(contentsOf: imageURL)
+        // 空間写真を表示するためのエンティティを作成
+        let imageEntity = Entity()
+        imageEntity.name = "spatialPhoto"
 
-        // 50%表示のため2倍サイズ
-        let photoSize = size * 2.0
-        let photoMesh = MeshResource.generatePlane(width: photoSize, height: photoSize)
+        // ImagePresentationComponent を構成（async/throws）
+        var presentationComponent = try await ImagePresentationComponent(contentsOf: imageURL)
+        presentationComponent.desiredViewingMode = .spatial3DImmersive
+        imageEntity.components.set(presentationComponent)
 
-        var photoMaterial = UnlitMaterial()
-        photoMaterial.color = .init(texture: .init(texture))
-
-        let photoEntity = ModelEntity(mesh: photoMesh, materials: [photoMaterial])
-        photoEntity.name = "enoshimaPhoto"
-
-        // 回転なし（Portal平面と同じXY平面）
+        // Portal平面と同様に、XY平面正面を向ける（PortalWindowView は回転なしのためそのまま）
         // 40cm奥に配置（Z軸の負方向）
-        photoEntity.position = [0, 0, -0.4]
+        imageEntity.position = [0, 0, -0.4]
 
-        root.addChild(photoEntity)
+        // Portalサイズに合わせてスケールを調整
+        let scaleFactor: Float = 1.0 / 0.3 // 必要に応じて調整
+        imageEntity.scale = [size * scaleFactor, size * scaleFactor, 1]
+
+        root.addChild(imageEntity)
     }
 }
 

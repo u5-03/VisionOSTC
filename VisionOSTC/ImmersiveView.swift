@@ -47,12 +47,11 @@ struct ImmersiveView: View {
                     portalPlane.model?.mesh = newMesh
                 }
 
-                // 写真のサイズと位置も更新
+                // 空間写真（ImagePresentationComponent）側のスケールを更新
                 if let portalWorld = portal.findEntity(named: "portalWorld"),
-                   let photoEntity = portalWorld.findEntity(named: "enoshimaPhoto") as? ModelEntity {
-                    let photoSize = portalSize * 2.0  // 50%表示のため2倍
-                    let newPhotoMesh = MeshResource.generatePlane(width: photoSize, height: photoSize)
-                    photoEntity.model?.mesh = newPhotoMesh
+                   let spatialPhoto = portalWorld.findEntity(named: "spatialPhoto") {
+                    let scaleFactor: Float = 1.0 // 必要に応じて調整
+                    spatialPhoto.scale = [portalSize * scaleFactor, portalSize * scaleFactor, 1]
                 }
             }
         }
@@ -87,7 +86,7 @@ struct ImmersiveView: View {
         print("Portalを非表示にしました")
     }
 
-    /// Portalエンティティを作成（enoshima.JPGを表示）
+    /// Portalエンティティを作成（空間写真を表示）
     private func createPortalEntity() -> Entity {
         // Portal全体を包含するルートエンティティ
         let portalRoot = Entity()
@@ -102,11 +101,11 @@ struct ImmersiveView: View {
 
         print("Portal World作成")
 
-        // enoshima.JPGを背景として表示
+        // 空間写真を背景として表示
         Task {
             do {
                 try await createPhotoEnvironment(on: portalWorld)
-                print("enoshima.JPG環境の読み込み成功")
+                print("空間写真の読み込み成功")
             } catch {
                 print("環境の読み込み失敗: \(error.localizedDescription)")
             }
@@ -147,48 +146,42 @@ struct ImmersiveView: View {
         return portalRoot
     }
 
-    /// 写真を使った環境を作成
+    /// 空間写真環境を作成（ImagePresentationComponentを使用）
     private func createPhotoEnvironment(on root: Entity) async throws {
-        print("写真環境作成を開始します")
+        print("空間写真環境の構築を開始します")
 
-        // enoshima.JPGを読み込む
-        guard let imageURL = Bundle.main.url(forResource: "enoshima", withExtension: "JPG") else {
-            print("エラー: enoshima.JPGが見つかりません")
-            throw NSError(domain: "PortalError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to load enoshima.JPG"])
+        // HEIC(空間写真)を読み込む
+        guard let imageURL = Bundle.main.url(forResource: "space_picture", withExtension: "heic") else {
+            print("エラー: space_picture.heic が見つかりません")
+            throw NSError(domain: "PortalError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to load space_picture.heic"])
         }
-        print("enoshima.JPG URLを取得: \(imageURL)")
+        print("space_picture.heic URLを取得: \(imageURL)")
 
-        // TextureResourceとして読み込み
-        let texture = try await TextureResource(contentsOf: imageURL)
-        print("TextureResourceの読み込み成功")
+        // 空間写真を表示するためのエンティティを作成
+        let imageEntity = Entity()
+        imageEntity.name = "spatialPhoto"
 
-        // 写真を表示する平面を作成
-        // Portal入口と同じサイズを基準に、200%に拡大（50%が見える状態）
-        // これにより、覗き込んだ時に写真のエッジが見切れてPortalらしいエフェクトになる
-        let scaleFactor: Float = 1.0 / 0.5  // 2倍
-        let photoSize: Float = portalSize * scaleFactor
-        let photoMesh = MeshResource.generatePlane(width: photoSize, height: photoSize)
+        // ImagePresentationComponent を構成
+        guard let presentation = try? await ImagePresentationComponent(contentsOf: imageURL) else { return }
 
-        // UnlitMaterialを使用して写真を表示
-        var photoMaterial = UnlitMaterial()
-        photoMaterial.color = .init(texture: .init(texture))
+        // エンティティにコンポーネントを設定
+        imageEntity.components.set(presentation)
 
-        let photoEntity = ModelEntity(mesh: photoMesh, materials: [photoMaterial])
-        photoEntity.name = "enoshimaPhoto"
+        // Portal平面と同様に、X軸周りに-90度回転させて正面を向ける
+        imageEntity.orientation = simd_quatf(angle: -.pi / 2, axis: [1, 0, 0])
 
-        // 写真の向きをPortal平面と同じにする
-        // Portal平面がX軸周りに-90度回転しているので、写真も同じ回転を適用
-        photoEntity.orientation = simd_quatf(angle: -.pi / 2, axis: [1, 0, 0])
+        // Portalの奥側に配置（回転後の座標系でY負方向が奥）
+        imageEntity.position = [0, -0.4, 0]
 
-        // 写真の配置:
-        // Portal平面の奥に配置（回転後の座標系でY軸の負方向が奥）
-        // 40cm奥に配置
-        photoEntity.position = [0, -0.4, 0]
+        // Portalサイズに合わせてスケールを調整
+        // 空間写真自体は実寸の見え方を持つが、ポータル内に収めるための係数を適用
+        let scaleFactor: Float = 1.0 // 必要に応じて調整
+        imageEntity.scale = [portalSize * scaleFactor, portalSize * scaleFactor, 1]
 
-        root.addChild(photoEntity)
+        root.addChild(imageEntity)
 
         print("空間写真環境の構築が完了しました")
-        print("写真エンティティ - 位置: \(photoEntity.position), スケール: \(photoEntity.scale)")
+        print("空間写真エンティティ - 位置: \(imageEntity.position), スケール: \(imageEntity.scale)")
     }
 }
 
