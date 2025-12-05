@@ -1,29 +1,45 @@
 {
-    "model": "opus",
     "permissions": {
-        "allow": [
-            "Bash(dart *)",
-            "Bash(git *)",
-            "Bash(ls *)",
-            "Bash(cd *)",
-            "Bash(mkdir *)",
-            "Bash(rm -rf build/)",
-            "Bash(pwd)",
-            "Bash(xcodebuild:*)",
-            "Bash(swiftlint:*)",
-            "Bash(swift test:*)"
-        ],
-        "deny": [
-            "Bash(rm -rf /)",
-            "Bash(rm -rf --no-preserve-root *)",
-            "Bash(rm -rf ~)",
-            "Bash(sudo *)",
-            "Bash(dd if=*)",
-            "Bash(:(){ :|:& };:)",
-            "Bash(reboot)",
-            "Bash(shutdown)",
-            "Bash(mkfs.*)",
-            "Bash(chmod 000 *)"
-        ]
+      "allow": [
+        "Bash(tmux-cli:*)",
+        "Bash(tmux:*)",
+        "Bash(codex:*)",
+        "Bash(sleep:*)",
+        "Bash(python:*)",
+        "Bash(cat:*)",
+        "Bash(ls:*)",
+        "Bash(tail:*)",
+        "Bash(head:*)",
+        "Bash(appium:*)",
+        "Bash(dart:*)",
+        "Bash(git:*)",
+        "Bash(cd:*)",
+        "Bash(mkdir:*)",
+        "Bash(rm -rf build/:*)",
+        "Bash(pwd)",
+        "Bash(xcodebuild:*)",
+        "Bash(swiftlint:*)",
+        "Bash(swift:*)",
+        "Bash(xcrun simctl:*)",
+        "mcp__playwright",
+        "mcp__XcodeBuildMCP",
+        "mcp__mcp-appium-visual",
+        "WebSearch",
+        "Read",
+        "Bash(npm search:*)",
+        "Bash(find:*)"
+      ],
+      "deny": [
+        "Bash(rm -rf /)",
+        "Bash(rm -rf --no-preserve-root:*)",
+        "Bash(rm -rf ~)",
+        "Bash(sudo:*)",
+        "Bash(dd if=:*)",
+        "Bash(reboot)",
+        "Bash(shutdown)",
+        "Bash(mkfs.:*)",
+        "Bash(chmod 000:*)"
+      ]
     }
-}
+  }
+  

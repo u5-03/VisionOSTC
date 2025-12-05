@@ -162,21 +162,35 @@ struct ImmersiveView: View {
         imageEntity.name = "spatialPhoto"
 
         // ImagePresentationComponent を構成
-        guard let presentation = try? await ImagePresentationComponent(contentsOf: imageURL) else { return }
+        var presentationComponent = try await ImagePresentationComponent(contentsOf: imageURL)
+
+        // 空間写真として表示するために desiredViewingMode を設定
+        // availableViewingModes を確認して適切なモードを選択
+        print("利用可能なビューイングモード: \(presentationComponent.availableViewingModes)")
+
+        if presentationComponent.availableViewingModes.contains(.spatialStereo) {
+            // ステレオスコピック空間写真として表示
+            presentationComponent.desiredViewingMode = .spatialStereo
+            print("空間写真モード: .spatialStereo を設定")
+        } else if presentationComponent.availableViewingModes.contains(.spatial3DImmersive) {
+            // 3D没入型として表示
+            presentationComponent.desiredViewingMode = .spatial3DImmersive
+            print("空間写真モード: .spatial3DImmersive を設定")
+        } else {
+            print("警告: 空間写真モードが利用できません。利用可能: \(presentationComponent.availableViewingModes)")
+        }
 
         // エンティティにコンポーネントを設定
-        imageEntity.components.set(presentation)
+        imageEntity.components.set(presentationComponent)
 
         // Portal平面と同様に、X軸周りに-90度回転させて正面を向ける
         imageEntity.orientation = simd_quatf(angle: -.pi / 2, axis: [1, 0, 0])
 
         // Portalの奥側に配置（回転後の座標系でY負方向が奥）
-        imageEntity.position = [0, -0.4, 0]
+        imageEntity.position = [0, -0.6, 0]
 
-        // Portalサイズに合わせてスケールを調整
-        // 空間写真自体は実寸の見え方を持つが、ポータル内に収めるための係数を適用
-        let scaleFactor: Float = 1.0 // 必要に応じて調整
-        imageEntity.scale = [portalSize * scaleFactor, portalSize * scaleFactor, 1]
+        // 背景画像を1.5倍に拡大
+        imageEntity.scale = [1.5, 1.5, 1.5]
 
         root.addChild(imageEntity)
 

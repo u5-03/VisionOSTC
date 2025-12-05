@@ -121,16 +121,30 @@ struct PortalWindowView: View {
 
         // ImagePresentationComponent を構成（async/throws）
         var presentationComponent = try await ImagePresentationComponent(contentsOf: imageURL)
-        presentationComponent.desiredViewingMode = .spatial3DImmersive
+
+        // 空間写真として表示するために desiredViewingMode を設定
+        print("利用可能なビューイングモード: \(presentationComponent.availableViewingModes)")
+
+        if presentationComponent.availableViewingModes.contains(.spatialStereo) {
+            // ステレオスコピック空間写真として表示（これが立体視に必要）
+            presentationComponent.desiredViewingMode = .spatialStereo
+            print("空間写真モード: .spatialStereo を設定")
+        } else if presentationComponent.availableViewingModes.contains(.spatial3DImmersive) {
+            // 3D没入型として表示
+            presentationComponent.desiredViewingMode = .spatial3DImmersive
+            print("空間写真モード: .spatial3DImmersive を設定")
+        } else {
+            print("警告: 空間写真モードが利用できません。利用可能: \(presentationComponent.availableViewingModes)")
+        }
+
         imageEntity.components.set(presentationComponent)
 
         // Portal平面と同様に、XY平面正面を向ける（PortalWindowView は回転なしのためそのまま）
-        // 40cm奥に配置（Z軸の負方向）
-        imageEntity.position = [0, 0, -0.4]
+        // 60cm奥に配置（Z軸の負方向）
+        imageEntity.position = [0, 0, -0.6]
 
-        // Portalサイズに合わせてスケールを調整
-        let scaleFactor: Float = 1.0 / 0.3 // 必要に応じて調整
-        imageEntity.scale = [size * scaleFactor, size * scaleFactor, 1]
+        // 背景画像を1.5倍に拡大
+        imageEntity.scale = [1.5, 1.5, 1.5]
 
         root.addChild(imageEntity)
     }

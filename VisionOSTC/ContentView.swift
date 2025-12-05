@@ -110,7 +110,7 @@ struct ContentView: View {
                     .background(Color.blue.opacity(0.1))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                    Text("Siriショートカットは「Hey Siri, \(WAKE_WORD)でエアコンを操作」などで利用できます")
+                    Text("Siriショートカットは「Hey Siri, ビジョンでエアコンをつけて」などで利用できます")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -193,8 +193,9 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Siriで試してみよう:")
                         .font(.headline)
-                    Text("「Hey Siri, \(WAKE_WORD)でエアコンの温度を上げて」")
-                    Text("「Hey Siri, \(WAKE_WORD)で家族に連絡」")
+                    Text("「Hey Siri, ビジョンでエアコンをつけて」")
+                    Text("「Hey Siri, ビジョンで温度を上げて」")
+                    Text("「Hey Siri, ビジョンで家族に連絡して」")
                 }
                 .font(.subheadline)
                 .padding()

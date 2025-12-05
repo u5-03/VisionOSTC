@@ -19,5 +19,20 @@
 	<string>このアプリはローカル通知を送信するために通知機能を使用します</string>
 	<key>AppIntentsPackage</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>INAlternativeAppNames</key>
+	<array>
+		<dict>
+			<key>INAlternativeAppName</key>
+			<string>ビジョン</string>
+			<key>INAlternativeAppNamePronunciationHint</key>
+			<string>びじょん</string>
+		</dict>
+		<dict>
+			<key>INAlternativeAppName</key>
+			<string>スマートホーム</string>
+			<key>INAlternativeAppNamePronunciationHint</key>
+			<string>すまーとほーむ</string>
+		</dict>
+	</array>
 </dict>
 </plist>
